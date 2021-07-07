@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:pac_man/components/path.dart';
@@ -35,6 +37,68 @@ class _HomePageState extends State<HomePage> {
     160, // bottom-half of the course
   ];
 
+  String direction = "right"; //controls pac_man player direction
+
+  void startGame() {
+    /*
+     * startGame - void function starts moving pac_man
+     * Note: Set timer to 300 milliseconds, any other speed is either too fast
+     * or too slow for pac man's movement speed.
+     */
+    Timer.periodic(Duration(milliseconds: 300), (timer) {
+      switch (direction) {
+        case "left":
+          moveLeft();
+          break;
+        case "right":
+          moveRight();
+          break;
+        case "up":
+          moveUp();
+          break;
+        case "down":
+          moveDown();
+          break;
+      }
+    });
+  }
+
+  void moveLeft() {
+    //controls player left movement
+    if (!barriers.contains(player - 1)) {
+      setState(() {
+        player--;
+      });
+    }
+  }
+
+  void moveRight() {
+    //controls player right movement
+    if (!barriers.contains(player + 1)) {
+      setState(() {
+        player++;
+      });
+    }
+  }
+
+  void moveUp() {
+    //controls player up movement
+    if (!barriers.contains(player - numberInRow)) {
+      setState(() {
+        player -= numberInRow;
+      });
+    }
+  }
+
+  void moveDown() {
+    //controls player down movement
+    if (!barriers.contains(player + numberInRow)) {
+      setState(() {
+        player += numberInRow;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,29 +107,68 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             flex: 5,
-            child: Container(
-              child: GridView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: numberOfSquares,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: numberInRow),
-                  itemBuilder: (BuildContext context, int index) {
-                    if (player == index) {
-                      return MyPlayer();
-                    } else if (barriers.contains(index)) {
-                      return MyPixel(
-                        innerColor: Colors.blue[700],
-                        outerColor: Colors.blue[700],
-                        //child: Text(index.toString()), //uncomment for index
-                      );
-                    } else {
-                      return MyPath(
-                        innerColor: Colors.yellow,
-                        outerColor: Colors.black,
-                        //child: Text(index.toString()), //uncomment for index
-                      );
-                    }
-                  }),
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  direction = "down";
+                } else if (details.delta.dy < 0) {
+                  direction = "up";
+                }
+                //print(direction); //uncomment for direction output in console
+              },
+              onHorizontalDragUpdate: (details) {
+                if (details.delta.dx > 0) {
+                  direction = "right";
+                } else if (details.delta.dx < 0) {
+                  direction = "left";
+                }
+                //print(direction); //uncomment for direction output in console
+              },
+              child: Container(
+                child: GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: numberOfSquares,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: numberInRow),
+                    itemBuilder: (BuildContext context, int index) {
+                      if (player == index) {
+                        switch (direction) {
+                          //controls direction pac_man is facing
+                          case "left":
+                            return Transform.rotate(
+                              angle: pi,
+                              child: MyPlayer(),
+                            );
+                          case "right":
+                            return MyPlayer();
+                          case "up":
+                            return Transform.rotate(
+                              angle: 3 * pi / 2,
+                              child: MyPlayer(),
+                            );
+                          case "down":
+                            return Transform.rotate(
+                              angle: pi / 2,
+                              child: MyPlayer(),
+                            );
+                          default:
+                            return MyPlayer();
+                        }
+                      } else if (barriers.contains(index)) {
+                        return MyPixel(
+                          innerColor: Colors.blue[700],
+                          outerColor: Colors.blue[700],
+                          //child: Text(index.toString()), //uncomment for index
+                        );
+                      } else {
+                        return MyPath(
+                          innerColor: Colors.yellow,
+                          outerColor: Colors.black,
+                          //child: Text(index.toString()), //uncomment for index
+                        );
+                      }
+                    }),
+              ),
             ),
           ),
           Expanded(
@@ -77,10 +180,12 @@ class _HomePageState extends State<HomePage> {
                     "Score: ",
                     style: TextStyle(color: Colors.white, fontSize: 40),
                   ),
-                  Text(
-                    "P L A Y",
-                    style: TextStyle(color: Colors.white, fontSize: 40),
-                  ),
+                  GestureDetector(
+                      onTap: startGame,
+                      child: Text(
+                        "P L A Y",
+                        style: TextStyle(color: Colors.white, fontSize: 40),
+                      )),
                 ],
               ),
             ),
