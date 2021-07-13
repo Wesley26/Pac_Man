@@ -1,6 +1,7 @@
 # Pac_man
 
-Pac Man flutter project.
+Pac Man flutter project made for fun to test out Dart/Flutter as a whole.
+Originally based off of the Pac_Man Dart/Flutter app [found here](https://mitchkoko.app/).
 
 ## Reference Links
 

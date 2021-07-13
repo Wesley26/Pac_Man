@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:pac_man/components/path.dart';
 import 'package:pac_man/components/pixel.dart';
 import 'package:pac_man/components/player.dart';
+//import 'package:pac_man/components/ghost.dart';
 
 /*
  * Home page class component.
@@ -19,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   static int numberInRow = 11;
   int numberOfSquares = numberInRow * 17; //builds the map made out of squares
   int player = numberInRow * 15 + 1; //player start position
+  int score = 0; //player's score
 
   /*
    * barriers - Array storing which square indices act as game barriers.
@@ -37,7 +39,10 @@ class _HomePageState extends State<HomePage> {
     160, // bottom-half of the course
   ];
 
+  List<int> food = []; //starts empty
+
   String direction = "right"; //controls pac_man player direction
+  //right movement is the default direction
 
   void startGame() {
     /*
@@ -45,7 +50,16 @@ class _HomePageState extends State<HomePage> {
      * Note: Set timer to 300 milliseconds, any other speed is either too fast
      * or too slow for pac man's movement speed.
      */
-    Timer.periodic(Duration(milliseconds: 300), (timer) {
+    moveGhost();
+    //gameStarted = true;
+    getFood();
+    Duration duration = Duration(milliseconds: 300);
+    Timer.periodic(duration, (timer) {
+      if (food.contains(player)) {
+        food.remove(player);
+        score++;
+      }
+
       switch (direction) {
         case "left":
           moveLeft();
@@ -61,6 +75,20 @@ class _HomePageState extends State<HomePage> {
           break;
       }
     });
+  }
+
+  String ghostDirection = "left";
+  void moveGhost() {
+    //tbd
+  }
+
+  void getFood() {
+    //obtain pac_man food items in the game, add to food Array
+    for (int i = 0; i < numberOfSquares; i++) {
+      if (!barriers.contains(i)) {
+        food.add(i);
+      }
+    }
   }
 
   void moveLeft() {
@@ -177,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    "Score: ",
+                    "Score: " + score.toString(),
                     style: TextStyle(color: Colors.white, fontSize: 40),
                   ),
                   GestureDetector(
